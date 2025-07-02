@@ -252,7 +252,7 @@ def main():
     id = 'kristiansand' # 홈택스 ID
     pw = '1q2w#E$R%T' # 홈택스 PW
 
-    amount = '1430000' # 거래금액(원)
+    amount = '1300000' # 거래금액(원)
     business_reg_num = '7761702078' # 사업자등록번호/전화번호/주민등록번호
     issue_purpose = '지출증빙'
     file_path = '/receipts' # 파일 경로(다운로드)
@@ -267,6 +267,7 @@ def main():
         \n\n감사합니다.\n이형우 드림' # 메일 내용
 
     # for loop로 여러개 발급도 가능함.
+    # for i in range(3):
     run = CashReceipt()
     run.open_chrome()
     run.login_fn(id, pw)
