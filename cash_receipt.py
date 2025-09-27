@@ -58,7 +58,7 @@ class CashReceipt:
         self.driver = webdriver.Chrome()
         return self.driver
 
-    def login_fn(self, id, pw):
+    def login_fn(self, id, pw, resident_num):
         # 페이지 로딩될 때까지 최대 30초 기다림
         wait = WebDriverWait(self.driver, 30) # "driver.implicitly_wait(30)"보다 더 좋은듯듯
         
@@ -74,12 +74,25 @@ class CashReceipt:
         # Enter ID, PW & Click 로그인 button
         wait.until(EC.visibility_of_element_located((By.ID, 'mf_txppWframe_loginboxFrame_iptUserId'))).send_keys(id)
         wait.until(EC.visibility_of_element_located((By.ID, 'mf_txppWframe_loginboxFrame_iptUserPw'))).send_keys(pw)
-        wait.until(EC.element_to_be_clickable((By.ID, 'mf_txppWframe_loginboxFrame_wq_uuid_884'))).click()
+        wait.until(EC.element_to_be_clickable((By.ID, 'mf_txppWframe_loginboxFrame_wq_uuid_917'))).click()
+
+        # 아이디 로그인 2차 인증 (새로 생긴 창)
+        time.sleep(1) # 페이지 활성화될 때까지 기다림
+        wait.until(EC.visibility_of_element_located((By.ID, 'mf_txppWframe_loginboxFrame_UTXPPABC12_wframe_iptUserJuminNo1'))).send_keys(resident_num[0])
+        wait.until(EC.visibility_of_element_located((By.ID, 'mf_txppWframe_loginboxFrame_UTXPPABC12_wframe_iptUserJuminNo2'))).send_keys(resident_num[1])
+        wait.until(EC.element_to_be_clickable((By.ID, 'mf_txppWframe_loginboxFrame_UTXPPABC12_wframe_trigger46'))).click()
 
     def apply_receipt_fn(self, issue_purpose, amount, business_reg_num): # 현금영수증 발급
         wait = WebDriverWait(self.driver, 30)
 
+        # 팝업창 닫기
+        while len(self.driver.window_handles) > 1:
+            self.driver.switch_to.window(self.driver.window_handles[-1])
+            self.driver.close()
+        self.driver.switch_to.window(self.driver.window_handles[0])
+
         # Click 탭(전체메뉴-발급-건별발급)
+        time.sleep(1)
         element = wait.until(EC.presence_of_element_located((By.ID, 'mf_wfHeader_hdGroup005'))) # 요소가 존재하는지 확인
         self.driver.execute_script("arguments[0].scrollIntoView(true);", element) # 스크롤을 해당 요소로 이동 (주로 요소가 팝업 메뉴에 가려져서 클릭이 안되는 경우)
         wait.until(EC.element_to_be_clickable((By.ID, 'mf_wfHeader_hdGroup005'))).click()
@@ -251,6 +264,7 @@ class CashReceipt:
 def main():
     id = 'kristiansand' # 홈택스 ID
     pw = '1q2w#E$R%T' # 홈택스 PW
+    resident_num = ('890814', '1')
 
     amount = '1300000' # 거래금액(원)
     business_reg_num = '7761702078' # 사업자등록번호/전화번호/주민등록번호
@@ -270,7 +284,7 @@ def main():
     # for i in range(3):
     run = CashReceipt()
     run.open_chrome()
-    run.login_fn(id, pw)
+    run.login_fn(id, pw, resident_num)
     run.apply_receipt_fn(issue_purpose, amount, business_reg_num)
 
 if __name__ == '__main__':
